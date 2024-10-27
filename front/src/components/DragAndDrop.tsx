@@ -1,19 +1,56 @@
 "use client";
 
 import { useReceiptStore } from "@/store/ReceiptsStore";
-import { useEffect, useState } from "react";
-import { AiOutlineCheckCircle } from "react-icons/ai";
+import { useReducer, useCallback } from "react";
 import { MdClear } from "react-icons/md";
 
+type Action =
+  | { type: "SET_FILES"; payload: File[] }
+  | { type: "REMOVE_FILE"; payload: number }
+  | { type: "CLEAR_FILES" }
+  | { type: "SET_UPLOADING"; payload: boolean }
+  | { type: "SET_DRAGGING"; payload: boolean };
+
+interface State {
+  files: File[];
+  uploading: boolean;
+  isDragging: boolean;
+}
+
+const initialState: State = {
+  files: [],
+  uploading: false,
+  isDragging: false,
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_FILES":
+      return { ...state, files: [...state.files, ...action.payload] };
+    case "REMOVE_FILE":
+      return {
+        ...state,
+        files: state.files.filter((_, i) => i !== action.payload),
+      };
+    case "CLEAR_FILES":
+      return { ...state, files: [] };
+    case "SET_UPLOADING":
+      return { ...state, uploading: action.payload };
+    case "SET_DRAGGING":
+      return { ...state, isDragging: action.payload };
+    default:
+      return state;
+  }
+}
+
 export default function DragAndDrop() {
-  const [uploading, setUploading] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const store = useReceiptStore();
 
   const handleSendFiles = async () => {
-    setUploading(true);
+    dispatch({ type: "SET_UPLOADING", payload: true });
     const formData = new FormData();
-    files.forEach((file) => {
+    state.files.forEach((file) => {
       formData.append("files", file);
     });
 
@@ -24,63 +61,54 @@ export default function DragAndDrop() {
       });
 
       if (response.ok) {
-        console.log("Files sent successfully!");
         const jsonData = await response.json();
         store.updateListReceipts(jsonData.data);
-        setFiles([])
+        dispatch({ type: "CLEAR_FILES" });
       } else {
         console.error("Error sending files:", response.status);
       }
     } catch (error) {
       console.error("Error sending files:", error);
     } finally {
-      setUploading(false);
+      dispatch({ type: "SET_UPLOADING", payload: false });
     }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLElement>) => {
-    event.preventDefault(); // Prevent default behavior to allow drop
-    event.dataTransfer.dropEffect = 'copy'; // Indicate a copy operation
   };
 
   const handleDrop = (event: React.DragEvent<HTMLElement>) => {
     event.preventDefault();
-    const droppedFiles = event.dataTransfer.files;
-    if (droppedFiles.length > 0) {
-      const newFiles = Array.from(droppedFiles);
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    }
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    dispatch({ type: "SET_FILES", payload: droppedFiles });
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
   };
 
   const handleRemoveFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    dispatch({ type: "REMOVE_FILE", payload: index });
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
     if (selectedFiles && selectedFiles.length > 0) {
       const newFiles = Array.from(selectedFiles);
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+      dispatch({ type: "SET_FILES", payload: newFiles });
     }
   };
 
   const handleBrowseClick = () => {
-    const fileInput = document.getElementById("fileInput")!;
-    fileInput.click();
+    const fileInput = document.getElementById("fileInput");
+    fileInput?.click();
   };
-
-  useEffect(() => {
-    setFiles(files);
-  }, [files, setFiles]);
 
   return (
     <section
       onDrop={handleDrop}
-
       onDragOver={handleDragOver}
-      className=" bg-zinc-900 w-[30vw] border border-slate-600 border-solid m-4 p-2 h-full relative font-geist"
+      className="bg-zinc-900 w-[30vw] border border-slate-600 border-solid m-4 p-2 h-full relative font-geist"
     >
-      <div className=" h-40 gap-4">
+      <div className="h-40 gap-4">
         <input
           type="file"
           id="fileInput"
@@ -89,28 +117,26 @@ export default function DragAndDrop() {
           multiple
         />
         <button
-          className=" bg-orange-300 p-2 rounded-sm text-black "
+          className="bg-orange-300 p-2 rounded-sm text-black hover:scale-105"
           onClick={handleBrowseClick}
         >
           Browse Files
         </button>
       </div>
       <div>
-        {files.length > 0 && (
-          <div>
-            {files.map((file, index) => (
-              <div key={index} className=" flex">
+        {state.files.length > 0 && (
+          <div className="mb-2">
+            {state.files.map((file, index) => (
+              <div
+                key={index}
+                className="flex bg-green-300 p-1 rounded-md w-fit mb-1 text-black"
+              >
                 <div className="file-info">
                   <p>{file.name}</p>
                 </div>
                 <div className="flex">
-                  <AiOutlineCheckCircle
-                    className=" hover:cursor-pointer"
-                    size={20}
-                    style={{ color: "#6DC24B", marginRight: 1 }}
-                  />
                   <MdClear
-                    className=" hover:cursor-pointer"
+                    className="hover:cursor-pointer"
                     fill="red"
                     size={20}
                     onClick={() => handleRemoveFile(index)}
@@ -121,17 +147,25 @@ export default function DragAndDrop() {
           </div>
         )}
       </div>
-      {files.length > 0 ? (
-        <button
-          disabled={uploading}
-          className="bg-orange-300 p-2 rounded-sm text-black font-geist"
-          onClick={handleSendFiles}
-        >
-          Send Files
-        </button>
-      ) : null}
+      {state.files.length > 0 && (
+        <div className="mb-2">
+          <button
+            disabled={state.uploading}
+            className="bg-orange-300 p-2 rounded-sm text-black font-geist hover:scale-105"
+            onClick={handleSendFiles}
+          >
+            Enviar
+          </button>
+          <button
+            onClick={() => dispatch({ type: "CLEAR_FILES" })}
+            className="bg-red-400 p-2 ml-2 rounded-sm text-black font-geist hover:scale-105"
+          >
+            Limpar tudo
+          </button>
+        </div>
+      )}
 
-      <p>{files.length} file(s) selected </p>
+      <p>{state.files.length} file(s) selected</p>
     </section>
   );
 }
