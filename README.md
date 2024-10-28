@@ -50,7 +50,7 @@ Esse resultado depois de uma trabalhada no prompt que mandamos pro modelo, já d
 
 
 
-nota: minha máquina tem uma rx 7600 da AMD. O Rocm só tem o HIP SDK disponivel pra windows, no entanto o PYTORCH não funciona direito com a minha placa no windows. Sendo assim, não tem como eu fazer inferencia por GPU no meu computador
+nota: minha máquina tem uma rx 7600 da AMD. O Rocm só tem o HIP SDK disponivel pra windows, no entanto o PYTORCH não funciona direito com a minha placa no windows. Sendo assim, não tem como eu fazer inferencia por GPU no meu computador. Por WSL 2, meu driver não tem suporte pra isso (a AMD não dá suporte pro ROCM no wsl pra minha placa)
 
 
 
