@@ -1,7 +1,8 @@
 "use client";
 
 import { useReceiptStore } from "@/store/ReceiptsStore";
-import { useReducer, useCallback } from "react";
+import { useErrorStore, useModelStore } from "@/store/UiStore";
+import { useReducer } from "react";
 import { MdClear } from "react-icons/md";
 
 type Action =
@@ -45,11 +46,14 @@ function reducer(state: State, action: Action): State {
 
 export default function DragAndDrop() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const store = useReceiptStore();
-
+  const receip_store = useReceiptStore();
+  const model_store = useModelStore();
+  const { setError } = useErrorStore();
   const handleSendFiles = async () => {
     dispatch({ type: "SET_UPLOADING", payload: true });
     const formData = new FormData();
+    const modelName = model_store.model;
+
     state.files.forEach((file) => {
       formData.append("files", file);
     });
@@ -57,15 +61,22 @@ export default function DragAndDrop() {
     try {
       const response = await fetch("http://127.0.0.1:3001/parser", {
         method: "POST",
+        headers: {
+          "X-Model-Name": modelName, // Custom header pro servidor
+        },
         body: formData,
       });
-
+      const jsonData = await response.json();
       if (response.ok) {
-        const jsonData = await response.json();
-        store.updateListReceipts(jsonData.data);
+        console.log("ok")
+        console.log(jsonData.data, "aqui")
+        receip_store.updateListReceipts(jsonData.data);
         dispatch({ type: "CLEAR_FILES" });
       } else {
         console.error("Error sending files:", response.status);
+        console.error("Error message:", jsonData.error);
+        setError(JSON.stringify(jsonData.error))
+
       }
     } catch (error) {
       console.error("Error sending files:", error);

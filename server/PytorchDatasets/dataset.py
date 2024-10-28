@@ -1,8 +1,20 @@
-from torch.utils.data import Dataset
+
+from datasets import load_dataset
+import torch
+from PIL import Image
+from transformers import UdopProcessor,  UdopForConditionalGeneration
+from torch.utils.data import Dataset, DataLoader
 from typing import Any, List
 import json
 import random
-import datasets
+import bitsandbytes as bnb
+
+dataset = load_dataset("naver-clova-ix/cord-v2")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+processor = UdopProcessor.from_pretrained("microsoft/udop-large")
+model = UdopForConditionalGeneration.from_pretrained("microsoft/udop-large")
+
 
 added_tokens = []
 
@@ -98,3 +110,49 @@ class CustomDataset(Dataset):
                                                   return_tensors="pt").input_ids.squeeze()
 
     return encoding
+  
+
+train_dataset = CustomDataset(dataset, processor, sort_json_key=False)
+
+train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+
+
+#training
+optimizer = bnb.optim.Adam8bit(model.parameters(), lr=5e-5)
+
+model.to(device)
+
+model.train()
+
+for epoch in range(100):  # loop over the dataset multiple times
+    for batch in train_dataloader:
+        # get the inputs;
+        batch = {k:v.to(device) for k,v in batch.items()}
+        input_ids = batch["input_ids"]
+        attention_mask = batch["attention_mask"]
+        bbox = batch["bbox"]
+        pixel_values = batch["pixel_values"]
+        labels = batch["labels"]
+
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward + backward + optimize
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            bbox=bbox,
+            pixel_values=pixel_values,
+            labels=labels,
+        )
+        loss = outputs.loss
+        loss.backward()
+        optimizer.step()
+
+        print("Loss:", loss.item())
+
+
+model.save_pretrained("fine-tuned-model")
+processor.save_pretrained("fine-tuned-model")
+

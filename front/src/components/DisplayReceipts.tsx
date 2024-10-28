@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { Fragment, useEffect, useState } from "react";
 
+// hard coded pra testes
 let test: Receipts[] = [
   {
     id: "12345",
@@ -84,6 +85,33 @@ let test: Receipts[] = [
       due_date: "16/01/2026",
     },
   },
+
+  {
+    id: "5296",
+    date: "04/10/17",
+    company: "SUPERMERCADO NOVA ESPERANCA LTDA.",
+    phone: "(47) 3424-0282",
+    address: "OLAVO BLABIL - 91 - JOINVILLE - SC",
+    items: [
+      {
+        id: "39115",
+        name: "ACUCAR CRISTAL UN",
+        price: "10.00",
+      },
+    ],
+    total: "100.00",
+    subtotal: "100.00",
+    tax: "0.00",
+    payment: {
+      name: "Pagamento",
+      company: "CIF",
+      email: "Fone",
+      address: "PODOE 002 - 28 DDL.",
+      phone: "(47) 3424-0282",
+      account_number: "252957628",
+      due_date: "24/10/17",
+    },
+  },
 ];
 
 const columnHelper = createColumnHelper<Receipts>();
@@ -110,7 +138,7 @@ const columns = [
     header: () => "date",
     cell: (info) => info.getValue(),
   }),
-  
+
   columnHelper.accessor("total", {
     id: "total",
     header: () => "Total",
@@ -123,8 +151,7 @@ const columns = [
   }),
 ];
 
-
-type ExpandedState = true | Record<string, boolean>
+type ExpandedState = true | Record<string, boolean>;
 
 export default function DisplayReceipts() {
   const store = useReceiptStore((state) => state.list_receipt);
@@ -197,7 +224,7 @@ export default function DisplayReceipts() {
                     })}
                   </tr>
                   {row.getIsExpanded() && (
-                    <tr >
+                    <tr>
                       <td colSpan={columns.length}>
                         <table className="w-full">
                           <thead>

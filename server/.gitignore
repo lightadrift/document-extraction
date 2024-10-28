@@ -1,3 +1,5 @@
 .venv/
 fine-tuned-model/
 *.ipynb
+models/
+./src/__pycache__
