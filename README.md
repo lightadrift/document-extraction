@@ -1,6 +1,6 @@
 ## Projeto Prototipo
 
-Fiz esse mini projeto nos últimos quatro dias para demonstrar as capacidades que posso oferecer. Este projeto não foca tanto no front-end; como diferencial, busquei mostrar um pouco dos meus conhecimentos em machine learning e deep learning, incluindo a arquitetura de projetos baseados em IA, treinamento de IA, fine-tuning e afins.
+Fiz esse mini projeto nos últimos quatro dias (no caso, foi antes do dia 15 que comecei ele, mas só fui dar uma polida nesse fim de semana) para demonstrar as capacidades que posso oferecer. Este projeto não foca tanto no front-end; como diferencial, busquei mostrar um pouco dos meus conhecimentos em machine learning e deep learning, incluindo a arquitetura de projetos baseados em IA, treinamento de IA, fine-tuning e afins.
 
 Embora esse projeto não esteja perfeito, ele ilustra minhas habilidades em tópicos importantes.
 
