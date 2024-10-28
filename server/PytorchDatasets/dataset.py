@@ -16,6 +16,10 @@ processor = UdopProcessor.from_pretrained("microsoft/udop-large")
 model = UdopForConditionalGeneration.from_pretrained("microsoft/udop-large")
 
 
+# base desse código é da propria microsoft. No entanto, parte da classe do dataset eu tive que reformular pra caber nos requesitos do UDOP
+
+
+
 added_tokens = []
 
 class CustomDataset(Dataset):
@@ -27,7 +31,7 @@ class CustomDataset(Dataset):
 
     for ground_truth in self.dataset["ground_truth"]:
         ground_truth = json.loads(ground_truth)
-        if "gt_parses" in ground_truth:  # when multiple ground truths are available, e.g., docvqa
+        if "gt_parses" in ground_truth: 
             assert isinstance(ground_truth["gt_parses"], list)
             gt_jsons = ground_truth["gt_parses"]
         else:
@@ -41,7 +45,7 @@ class CustomDataset(Dataset):
                     update_special_tokens_for_json_key=split == "train",
                     sort_json_key=sort_json_key,
                 )
-                for gt_json in gt_jsons  # load json from list of json
+                for gt_json in gt_jsons
             ]
         )
 
@@ -74,7 +78,7 @@ class CustomDataset(Dataset):
       else:
           obj = str(obj)
           if f"<{obj}/>" in added_tokens:
-              obj = f"<{obj}/>"  # for categorical special tokens
+              obj = f"<{obj}/>"
           return obj
 
   def add_tokens(self, list_of_tokens: List[str]):
@@ -89,6 +93,9 @@ class CustomDataset(Dataset):
   def __len__(self):
     return len(self.dataset)
 
+
+
+  #  código do github do UDOP
   def __getitem__(self, idx):
     # get item of the dataset
     sample = self.dataset[idx]

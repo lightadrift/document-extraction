@@ -85,7 +85,7 @@ let test: Receipts[] = [
       due_date: "16/01/2026",
     },
   },
-
+  // antigo resultado do modelo antes de especificar certas coisas
   {
     id: "5296",
     date: "04/10/17",
