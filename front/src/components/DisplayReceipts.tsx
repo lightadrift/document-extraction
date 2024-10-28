@@ -161,7 +161,7 @@ export default function DisplayReceipts() {
 
   useEffect(() => {
     console.log(store);
-    setData(test);
+    setData(test); // test com data hardcoded
   }, [store]);
 
   const table = useReactTable({
