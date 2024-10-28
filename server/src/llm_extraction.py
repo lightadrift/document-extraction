@@ -23,7 +23,7 @@ class DocumentParsingError(Exception):
     """Custom exception for document parsing errors."""
     pass
 
-
+# não usei esse decorador ainda
 def check_model_initialization(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -121,7 +121,7 @@ class Parser:
                     model_path=model_config["model_path"],
                     # chat_handler=Llava15ChatHandler,
 
-                    n_ctx=26000, # eu não ainda não conseguir fazer um metodo efetivo de passar uma imagem pro llm cpp. A única forma, foi por base64, mas a quantidade de contexto fica muito alta.
+                    n_ctx=26000, # eu ainda não conseguir fazer um metodo efetivo de passar uma imagem pro llm cpp. A única forma foi por base64, mas a quantidade de contexto fica muito alta.
                     n_threads=12,
 
                 )
