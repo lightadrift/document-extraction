@@ -18,8 +18,6 @@ model = UdopForConditionalGeneration.from_pretrained("microsoft/udop-large")
 
 # base desse código é da propria microsoft. No entanto, parte da classe do dataset eu tive que reformular pra caber nos requesitos do UDOP
 
-
-
 added_tokens = []
 
 class CustomDataset(Dataset):
@@ -95,7 +93,7 @@ class CustomDataset(Dataset):
 
 
 
-  #  código do github do UDOP
+  # GET item código do github do UDOP
   def __getitem__(self, idx):
     # get item of the dataset
     sample = self.dataset[idx]
@@ -125,14 +123,15 @@ train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 
 
 
-#training
+#training 
+# Testei esse optimizer pra tentar reduzir o uso de memória 
 optimizer = bnb.optim.Adam8bit(model.parameters(), lr=5e-5)
 
 model.to(device)
 
 model.train()
 
-for epoch in range(100):  # loop over the dataset multiple times
+for epoch in range(100):  # com o range em vinte, em uma GPU T4, durou 8 horas o treino. Esse dataset tem 800 samples
     for batch in train_dataloader:
         # get the inputs;
         batch = {k:v.to(device) for k,v in batch.items()}
@@ -142,7 +141,6 @@ for epoch in range(100):  # loop over the dataset multiple times
         pixel_values = batch["pixel_values"]
         labels = batch["labels"]
 
-        # zero the parameter gradients
         optimizer.zero_grad()
 
         # forward + backward + optimize
