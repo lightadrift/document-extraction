@@ -45,7 +45,7 @@ exemplo:
     }
 }
 
-Esse resultado depois de uma trabalhada no prompt que mandamos pro modelo, já deu resultos boms. Com um fine tuining especifico pra documentos em português e algums layouts, o resulto seria muito superior
+Esse resultado depois de uma trabalhada no prompt que mandamos pro modelo, já deu resultos bons. Com um fine tuining especifico pra documentos em português e algums layouts, o resulto seria muito superior
 
 
 
